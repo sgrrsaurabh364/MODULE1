@@ -1,19 +1,40 @@
+from rules import latest_financial_index, iscr_flag, total_revenue_5cr_flag, iscr, borrowing_to_revenue_flag
 import json
-import rules
 
-with open('data.json') as f:
-    data = json.load(f)
 
-latest_index = rules.latest_financial_index(data)
-average_value = rules.calculate_average(data, 'value')
-minimum_value = rules.calculate_minimum(data, 'value')
-maximum_value = rules.calculate_maximum(data, 'value')
+def probe_model_5l_profit(data: dict):
+    """
+    Evaluate various financial flags for the model.
 
-result = {
-    'latest_financial_index': latest_index,
-    'average_value': average_value,
-    'minimum_value': minimum_value,
-    'maximum_value': maximum_value
-}
+    :param data: A dictionary containing financial data.
+    :return: A dictionary with the evaluated flag values.
+    """
+    lastest_financial_index_value = latest_financial_index(data)
 
-print(json.dumps(result))
+    total_revenue_5cr_flag_value = total_revenue_5cr_flag(
+        data, lastest_financial_index_value
+    )
+
+    borrowing_to_revenue_flag_value = borrowing_to_revenue_flag(
+        data, lastest_financial_index_value
+    )
+
+    iscr_flag_value = iscr_flag(data, lastest_financial_index_value)
+
+    return {
+        "flags": {
+            "TOTAL_REVENUE_5CR_FLAG": total_revenue_5cr_flag_value,
+            "BORROWING_TO_REVENUE_FLAG": borrowing_to_revenue_flag_value,
+            "ISCR_FLAG": iscr_flag_value,
+        }
+    }
+
+
+if __name__ == "__main__":
+    # data = json.loads("t.json")
+    # print(data)
+    with open("data.json", "r") as file:
+        content = file.read()
+        # convert to json
+        data = json.loads(content)
+        print(probe_model_5l_profit(data["data"]))
